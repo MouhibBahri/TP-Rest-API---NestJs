@@ -21,7 +21,7 @@ export class AuthController {
   @Post('login')
   @UseGuards(LocalAuthGuard)
   @ApiOperation({ summary: 'Login with existing account' })
-  login(@Request() req) {
+  login(@Body() loginDto: LoginDto, @Request() req) {
     return this.authService.login(req.user);
   }
 
