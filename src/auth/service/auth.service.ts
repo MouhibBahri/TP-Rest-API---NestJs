@@ -1,21 +1,16 @@
-import {
-  ConflictException,
-  Inject,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { SignUpDto } from '../dto/sign-up.dto';
 import { UserEntity } from '../entities/user.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { LoginDto } from '../dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from '../interfaces/jwt-payload.interface';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @Inject(UserEntity)
+    @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
     private jwtService: JwtService,
   ) {}
@@ -43,7 +38,11 @@ export class AuthService {
       // The role attribute will be set to the default value: USER
     });
 
-    return await this.userRepository.save(newUser);
+    const savedUser: UserEntity = await this.userRepository.save(newUser);
+
+    // const { password:_, salt:__, ...result } = savedUser;
+    // returning all data for testing purposes only
+    return savedUser;
   }
   /*
   // No longer needed as it is replaced by passport local strategy and local auth guard
@@ -78,7 +77,7 @@ export class AuthService {
     if (!user) {
       return null;
     }
-    if (await bcrypt.compare(user.password, pass)) {
+    if (await bcrypt.compare(pass, user.password)) {
       const { password, ...result } = user;
       return result;
     }

@@ -28,7 +28,7 @@ export class SignUpDto {
   @IsStrongPassword()
   @ApiProperty({
     description: 'A strong password',
-    example: 'password123!',
+    example: 'Password123!',
   })
   password: string;
 }
