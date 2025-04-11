@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
+
 import { CvModule } from './cv/cv.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { SkillModule } from './skill/skill.module';
+import { AuthModule } from './auth/auth.module';
 
 
 @Module({
@@ -25,9 +26,11 @@ import { SkillModule } from './skill/skill.module';
         synchronize: true,
       }),
     }),
+
     CvModule,
     UserModule,
     SkillModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
