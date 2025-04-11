@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { CreateCvDto } from './dto/create-cv.dto';
 import { UpdateCvDto } from './dto/update-cv.dto';
 import { Cv } from './entities/cv.entity';
+import { FilterCvDto } from './dto/filter-cv.dto';
 
 @Injectable()
 export class CvService {
@@ -17,8 +18,23 @@ export class CvService {
     return this.cvRepository.save(cv);
   }
 
-  findAll() {
-    return this.cvRepository.find();
+  async findAll(filterCvDto: FilterCvDto) {
+    const { criteria, age } = filterCvDto;
+
+    const query = this.cvRepository.createQueryBuilder('cv');
+
+    if (criteria) {
+      query.where(
+        '(cv.name LIKE :criteria OR cv.firstname LIKE :criteria OR cv.job LIKE :criteria)',
+        { criteria: `%${criteria}%` },
+      );
+    }
+
+    if (age !== undefined) {
+      query.orWhere('cv.age = :age', { age });
+    }
+
+    return query.getMany();
   }
 
   findOne(id: number) {
