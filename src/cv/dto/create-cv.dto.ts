@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsString, IsNumber, IsArray, IsOptional } from 'class-validator';
 import { Skill } from 'src/skill/entities/skill.entity';
-import { User } from 'src/user/entities/user.entity';
+import { User } from '../../user/entities/user.entity';
 
 export class CreateCvDto {
   @IsNotEmpty()
@@ -31,5 +31,5 @@ export class CreateCvDto {
   skills: Skill[];
 
   @IsOptional()
-  user: User;
+  user: Partial<User>; 
 }

@@ -1,13 +1,19 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CvService } from './cv.service';
 import { CvController } from './cv.controller';
+import { CvV2Controller } from './cv-v2/cv-v2.controller';
 import { Cv } from './entities/cv.entity';
+import { AuthMiddleware } from '../middleware/cv-auth/cv-auth.middleware';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Cv])], // Register CvRepository
-  controllers: [CvController],
+  imports: [TypeOrmModule.forFeature([Cv])],
+  controllers: [CvController, CvV2Controller],
   providers: [CvService],
-  exports: [TypeOrmModule], // Export TypeOrmModule to make CvRepository available
+  exports: [TypeOrmModule],
 })
-export class CvModule {}
+export class CvModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(AuthMiddleware).forRoutes(CvV2Controller);
+  }
+}

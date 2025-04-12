@@ -16,16 +16,24 @@ export class Cv extends BaseEntity {
 
   @Column()
   name: string;
+
   @Column()
   firstname: string;
+
   @Column()
   age: number;
+
   @Column()
   cin: number;
+
   @Column()
   job: string;
+
   @Column()
   path: string;
+
+  @Column({ nullable: true }) // Add this column for the image path
+  imagePath: string;
 
   @ManyToMany(() => Skill, (skill) => skill.cvs, { eager: true })
   skills: Skill[];

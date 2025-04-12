@@ -3,6 +3,7 @@ import { CvService } from './cv.service';
 import { CreateCvDto } from './dto/create-cv.dto';
 import { UpdateCvDto } from './dto/update-cv.dto';
 import { FilterCvDto } from './dto/filter-cv.dto';
+import { paginate } from 'src/common/pagination.utils';
 
 @Controller('cv')
 export class CvController {
@@ -22,6 +23,7 @@ export class CvController {
   findOne(@Param('id') id: string) {
     return this.cvService.findOne(+id);
   }
+  
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateCvDto: UpdateCvDto) {

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateCvDto } from './dto/create-cv.dto';
@@ -19,6 +19,8 @@ export class CvService {
   }
 
   async findAll(filterCvDto: FilterCvDto) {
+    console.log('FilterCvDto:', filterCvDto);
+
     const { criteria, age } = filterCvDto;
 
     const query = this.cvRepository.createQueryBuilder('cv');
@@ -44,6 +46,15 @@ export class CvService {
   async update(id: number, updateCvDto: UpdateCvDto) {
     await this.cvRepository.update(id, updateCvDto);
     return this.cvRepository.findOne({ where: { id } });
+  }
+
+  async updateImage(id: number, filename: string) {
+    const cv = await this.cvRepository.findOne({ where: { id } });
+    if (!cv) {
+      throw new NotFoundException(`CV with ID ${id} not found`);
+    }
+    cv.imagePath = filename; // Assuming `imagePath` is a column in your CV entity
+    return this.cvRepository.save(cv);
   }
 
   async remove(id: number) {
