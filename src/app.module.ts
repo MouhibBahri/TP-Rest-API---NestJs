@@ -8,7 +8,6 @@ import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { SkillModule } from './skill/skill.module';
 import { AuthModule } from './auth/auth.module';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSourceOptions } from 'typeorm';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { APP_GUARD } from '@nestjs/core';

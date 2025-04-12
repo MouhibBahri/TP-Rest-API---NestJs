@@ -14,7 +14,7 @@ export class AuthMiddleware implements NestMiddleware {
     }
     try{
       const token=Array.isArray(authHeader)?authHeader[0]: authHeader;
-      const jwtSecret='refkatoken'; 
+      const jwtSecret='Banana'; 
       if(!jwtSecret) {
         return res.status(500).json({message:'Server configuration error'});
       }
