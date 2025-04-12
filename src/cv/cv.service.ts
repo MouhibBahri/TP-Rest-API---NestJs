@@ -18,9 +18,7 @@ export class CvService {
     return this.cvRepository.save(cv);
   }
 
-  async findAll(filterCvDto: FilterCvDto) {
-    console.log('FilterCvDto:', filterCvDto);
-
+  async findAll(filterCvDto: FilterCvDto, ownerUsername?: string) {
     const { criteria, age } = filterCvDto;
 
     const query = this.cvRepository.createQueryBuilder('cv');
@@ -34,6 +32,12 @@ export class CvService {
 
     if (age !== undefined) {
       query.orWhere('cv.age = :age', { age });
+    }
+
+    if (ownerUsername) {
+      query
+        .innerJoinAndSelect('cv.user', 'user')
+        .where('user.username = :ownerUsername', { ownerUsername });
     }
 
     return query.getMany();

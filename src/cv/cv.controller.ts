@@ -1,11 +1,24 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+} from '@nestjs/common';
 import { CvService } from './cv.service';
 import { CreateCvDto } from './dto/create-cv.dto';
 import { UpdateCvDto } from './dto/update-cv.dto';
 import { FilterCvDto } from './dto/filter-cv.dto';
+import { ApiBearerAuth } from '@nestjs/swagger';
+import { GetUser } from 'src/auth/decorators/get-user.decorator';
+import { Role } from 'src/common/enums/roles.enum';
 import { paginate } from 'src/common/pagination.utils';
 
 @Controller('cv')
+@ApiBearerAuth()
 export class CvController {
   constructor(private readonly cvService: CvService) {}
 
@@ -15,8 +28,12 @@ export class CvController {
   }
 
   @Get()
-  findAll(@Query() filterCvDto: FilterCvDto) {
-    return this.cvService.findAll(filterCvDto);
+  findAll(@GetUser() user, @Query() filterCvDto: FilterCvDto) {
+    if (user.role === Role.ADMIN) {
+      return this.cvService.findAll(filterCvDto);
+    }
+
+    return this.cvService.findAll(filterCvDto, user.username);
   }
 
   @Get(':id')
