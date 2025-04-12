@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ServeStaticModule } from '@nestjs/serve-static';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { CvModule } from './cv/cv.module';
@@ -11,6 +12,7 @@ import { AuthModule } from './auth/auth.module';
 import { DataSourceOptions } from 'typeorm';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { APP_GUARD } from '@nestjs/core';
+import {join} from 'path';
 
 @Module({
   imports: [

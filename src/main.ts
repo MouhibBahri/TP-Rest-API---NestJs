@@ -2,11 +2,15 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
-import { join } from 'path';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import * as express from 'express';
+import { join } from 'path';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  
+
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
 
   // Swagger configuration
   const config = new DocumentBuilder()
@@ -27,12 +31,11 @@ async function bootstrap() {
   app.useGlobalFilters();
   
   app.enableVersioning({
-    type: VersioningType.URI, // Use URI-based versioning (e.g., /v2/cv)
+    type: VersioningType.URI, 
   });
 
-  // Serve static files from the uploads directory
-  app.use('/uploads', express.static(join(__dirname, '..', 'uploads')));
-
+  
+  app.useStaticAssets(join(__dirname, '..', '..', 'public'));
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();

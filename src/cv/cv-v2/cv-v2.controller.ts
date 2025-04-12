@@ -55,7 +55,8 @@ export class CvV2Controller {
       storage: diskStorage({
         destination: './public/uploads', // Save files in the public/uploads directory
         filename: (req, file, callback) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
           const ext = extname(file.originalname); // Get the file extension
           callback(null, `cv-${uniqueSuffix}${ext}`); // Generate a unique filename
         },
@@ -66,8 +67,8 @@ export class CvV2Controller {
     @Param('id') id: string,
     @UploadedFile(
       new ParseFilePipeBuilder()
-        .addFileTypeValidator({ fileType: /image\/(jpeg|jpg|png)/ }) 
-        .addMaxSizeValidator({ maxSize: 10_000_000 }) 
+        .addFileTypeValidator({ fileType: /image\/(jpeg|jpg|png)/ })
+        .addMaxSizeValidator({ maxSize: 10_000_000 })
         .build({ errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY }),
     )
     file: Express.Multer.File,
