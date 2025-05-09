@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { ServeStaticModule } from '@nestjs/serve-static';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { CvModule } from './cv/cv.module';
@@ -12,7 +11,10 @@ import { AuthModule } from './auth/auth.module';
 import { DataSourceOptions } from 'typeorm';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { APP_GUARD } from '@nestjs/core';
-import {join} from 'path';
+import { join } from 'path';
+import { ChatGateway } from './websocket/chat.gateway';
+import { ChatService } from './websocket/chat.service';
+import { ChatModule } from './websocket/chat.module';
 
 @Module({
   imports: [
@@ -28,8 +30,7 @@ import {join} from 'path';
         password: configService.get<string>('DB_PASS'),
         database: configService.get<string>('DB_NAME'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: false,
-        
+        synchronize: true,
       }),
     }),
 
@@ -37,14 +38,16 @@ import {join} from 'path';
     UserModule,
     SkillModule,
     AuthModule,
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [
     AppService,
-    {
-      provide: APP_GUARD,
-      useClass: JwtAuthGuard,
-    },
+
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: JwtAuthGuard,
+    // },
   ],
 })
 export class AppModule {}

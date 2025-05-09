@@ -7,10 +7,7 @@ import * as express from 'express';
 import { join } from 'path';
 
 async function bootstrap() {
-  
-
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
-
 
   // Swagger configuration
   const config = new DocumentBuilder()
@@ -29,13 +26,20 @@ async function bootstrap() {
     }),
   );
   app.useGlobalFilters();
-  
+
   app.enableVersioning({
-    type: VersioningType.URI, 
+    type: VersioningType.URI,
   });
 
-  
   app.useStaticAssets(join(__dirname, '..', '..', 'public'));
+
+  // for testing the websocket
+  app.enableCors({
+    origin: '*',
+    methods: 'GET,POST,PUT,DELETE',
+    credentials: true,
+  });
+
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
