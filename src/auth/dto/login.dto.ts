@@ -9,8 +9,8 @@ import {
 
 export class LoginDto {
   @IsString()
-  @IsOptional()
-  @ApiPropertyOptional({
+  @IsNotEmpty()
+  @ApiProperty({
     description: 'Username or Email of the user',
     example: 'mouhib',
   })
