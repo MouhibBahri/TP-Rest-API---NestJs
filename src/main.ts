@@ -1,13 +1,19 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { ValidationPipe, VersioningType } from '@nestjs/common';
+import { ValidationPipe, Logger,VersioningType } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import * as express from 'express';
 import { join } from 'path';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const logger = new Logger('Bootstrap');
+  const app = await NestFactory.create(AppModule, {
+    logger: ['error', 'warn', 'debug', 'log', 'verbose'],
+  });
+
+  // Enable CORS
+  app.enableCors();
 
   // Swagger configuration
   const config = new DocumentBuilder()
@@ -26,6 +32,7 @@ async function bootstrap() {
     }),
   );
   app.useGlobalFilters();
+
 
   app.enableVersioning({
     type: VersioningType.URI,

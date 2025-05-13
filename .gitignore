@@ -12,6 +12,7 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
+
 # OS
 .DS_Store
 
@@ -27,6 +28,7 @@ lerna-debug.log*
 *.launch
 .settings/
 *.sublime-workspace
+/src/messaging/
 
 # IDE - VSCode
 .vscode/*

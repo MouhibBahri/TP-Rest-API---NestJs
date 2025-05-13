@@ -1,4 +1,4 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, Logger } from '@nestjs/common';
 import { SignUpDto } from '../dto/sign-up.dto';
 import { UserEntity } from '../entities/user.entity';
 import { Repository } from 'typeorm';
@@ -71,16 +71,21 @@ export class AuthService {
     let user = await this.userRepository.findOneBy({
       username: usernameOrEmail,
     });
+
     if (!user) {
-      await this.userRepository.findOneBy({ email: usernameOrEmail });
+      // Fix: Assign the result of the query to the user variable
+      user = await this.userRepository.findOneBy({ email: usernameOrEmail });
     }
+
     if (!user) {
       return null;
     }
+
     if (await bcrypt.compare(pass, user.password)) {
       const { password, ...result } = user;
       return result;
     }
+
     return null;
   }
 

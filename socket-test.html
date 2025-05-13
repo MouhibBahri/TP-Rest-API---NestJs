@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Socket.IO Test</title>
+  <script src="https://cdn.socket.io/4.4.1/socket.io.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    #messages { list-style-type: none; margin: 0; padding: 0; }
+    #messages li { margin-bottom: 5px; padding: 5px; border-bottom: 1px solid #eee; }
+    .system { color: #888; }
+    .error { color: red; }
+    .success { color: green; }
+    .container { display: flex; flex-direction: column; max-width: 800px; margin: 0 auto; }
+    .input-group { display: flex; margin-bottom: 20px; }
+    input { flex-grow: 1; padding: 8px; margin-right: 10px; }
+    button { padding: 8px 15px; background: #4CAF50; color: white; border: none; cursor: pointer; }
+    .panel { border: 1px solid #ddd; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
+    .status { font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Socket.IO Messaging Test</h1>
+    
+    <div class="panel">
+      <h3>Connection Status: <span id="status" class="status">Disconnected</span></h3>
+      <div>
+        <label for="token">JWT Token:</label>
+        <input type="text" id="token" style="width: 100%; margin: 10px 0;" 
+               value="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlMzkzMDQxMC1kZTc5LTQwOTItYmI1My0xNjU2NzhlYmIxOGIiLCJyb2xlIjoidXNlciIsImlhdCI6MTc0NjcxMzY5OCwiZXhwIjoxNzQ3MzE4NDk4fQ.z85B7eAVm3D_IFGGboQC_1qoY1nor0m8JJr2P9stNz8">
+        <button onclick="connect()">Connect</button>
+        <button onclick="disconnect()">Disconnect</button>
+      </div>
+    </div>
+    
+    <div class="panel">
+      <h3>Send Message</h3>
+      <div class="input-group">
+        <input type="text" id="messageInput" placeholder="Type a message...">
+        <button onclick="sendMessage()">Send</button>
+      </div>
+    </div>
+    
+    <div class="panel">
+      <h3>Add Reaction</h3>
+      <div class="input-group">
+        <input type="text" id="messageId" placeholder="Message ID">
+        <select id="reactionType">
+          <option value="like">Like</option>
+          <option value="love">Love</option>
+          <option value="haha">Haha</option>
+          <option value="wow">Wow</option>
+          <option value="sad">Sad</option>
+          <option value="angry">Angry</option>
+        </select>
+        <button onclick="addReaction()">React</button>
+      </div>
+    </div>
+    
+    <div class="panel">
+      <h3>Add Comment</h3>
+      <div class="input-group">
+        <input type="text" id="commentMessageId" placeholder="Message ID">
+        <input type="text" id="commentContent" placeholder="Comment content">
+        <button onclick="addComment()">Comment</button>
+      </div>
+    </div>
+    
+    <div class="panel">
+      <h3>Events:</h3>
+      <ul id="messages"></ul>
+    </div>
+  </div>
+  
+  <script>
+    let socket;
+    
+    function connect() {
+      // Disconnect existing socket if any
+      if (socket) {
+        socket.disconnect();
+      }
+      
+      const token = document.getElementById('token').value;
+      
+      // Update status
+      document.getElementById('status').textContent = 'Connecting...';
+      document.getElementById('status').className = 'status';
+      
+      // Connect to the Socket.IO server
+      socket = io('http://localhost:3000', {
+        extraHeaders: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      
+      // Connection events
+      socket.on('connect', () => {
+        console.log('Connected to Socket.IO server');
+        document.getElementById('status').textContent = 'Connected';
+        document.getElementById('status').className = 'status success';
+        addMessage('System', 'Connected to server', 'system');
+      });
+      
+      socket.on('connect_error', (error) => {
+        console.error('Connection error:', error);
+        document.getElementById('status').textContent = `Connection error: ${error.message}`;
+        document.getElementById('status').className = 'status error';
+        addMessage('System', `Connection error: ${error.message}`, 'error');
+      });
+      
+      socket.on('connection_success', (data) => {
+        console.log('Connection success:', data);
+        addMessage('System', data.message, 'success');
+      });
+      
+      socket.on('disconnect', () => {
+        console.log('Disconnected from Socket.IO server');
+        document.getElementById('status').textContent = 'Disconnected';
+        document.getElementById('status').className = 'status';
+        addMessage('System', 'Disconnected from server', 'system');
+      });
+      
+      // Message events
+      socket.on('new_message', (message) => {
+        console.log('New message received:', message);
+        addMessage(message.senderId || 'Unknown', message.content);
+      });
+      
+      socket.on('new_reaction', (data) => {
+        console.log('New reaction received:', data);
+        addMessage('System', `New reaction on message ${data.messageId}: ${data.reaction.type}`, 'system');
+      });
+      
+      socket.on('new_comment', (data) => {
+        console.log('New comment received:', data);
+        addMessage('System', `New comment on message ${data.messageId}: ${data.comment.content}`, 'system');
+      });
+    }
+    
+    function disconnect() {
+      if (socket) {
+        socket.disconnect();
+      }
+    }
+    
+    function sendMessage() {
+      if (!socket || !socket.connected) {
+        addMessage('System', 'Not connected to server', 'error');
+        return;
+      }
+      
+      const content = document.getElementById('messageInput').value;
+      if (content.trim()) {
+        console.log('Sending message:', content);
+        socket.emit('send_message', { content });
+        document.getElementById('messageInput').value = '';
+        addMessage('You', content);
+      }
+    }
+    
+    function addReaction() {
+      if (!socket || !socket.connected) {
+        addMessage('System', 'Not connected to server', 'error');
+        return;
+      }
+      
+      const messageId = document.getElementById('messageId').value;
+      const type = document.getElementById('reactionType').value;
+      
+      if (messageId.trim()) {
+        console.log('Adding reaction:', { messageId, type });
+        socket.emit('add_reaction', { messageId, type });
+        addMessage('You', `Added ${type} reaction to message ${messageId}`);
+      }
+    }
+    
+    function addComment() {
+      if (!socket || !socket.connected) {
+        addMessage('System', 'Not connected to server', 'error');
+        return;
+      }
+      
+      const messageId = document.getElementById('commentMessageId').value;
+      const content = document.getElementById('commentContent').value;
+      
+      if (messageId.trim() && content.trim()) {
+        console.log('Adding comment:', { messageId, content });
+        socket.emit('add_comment', { messageId, content });
+        addMessage('You', `Added comment to message ${messageId}: ${content}`);
+        document.getElementById('commentContent').value = '';
+      }
+    }
+    
+    function addMessage(sender, content, type = '') {
+      const messagesEl = document.getElementById('messages');
+      const li = document.createElement('li');
+      li.textContent = `${sender}: ${content}`;
+      if (type) {
+        li.className = type;
+      }
+      messagesEl.insertBefore(li, messagesEl.firstChild);
+    }
+  </script>
+</body>
+</html>
