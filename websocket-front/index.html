@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>WebSocket Chat Test</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      .container {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+      .section {
+        border: 1px solid #ccc;
+        padding: 15px;
+        border-radius: 5px;
+      }
+      .hidden {
+        display: none;
+      }
+      input,
+      button {
+        padding: 8px;
+        margin: 5px 0;
+      }
+      #log {
+        background-color: #f5f5f5;
+        padding: 10px;
+        border-radius: 5px;
+        max-height: 300px;
+        overflow-y: auto;
+      }
+      .input-group {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+      .input-group input {
+        flex-grow: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>WebSocket Chat Test</h1>
+
+      <!-- Login Section -->
+      <div id="loginSection" class="section">
+        <h2>Authentication</h2>
+
+        <!-- Login Form -->
+        <div id="loginForm">
+          <h3>Login</h3>
+          <div class="input-group">
+            <input type="text" id="username" placeholder="Username" />
+            <input type="password" id="password" placeholder="Password" />
+            <button onclick="login()">Login</button>
+          </div>
+          <p>
+            Don't have an account?
+            <a href="#" onclick="toggleAuthForms()">Sign up</a>
+          </p>
+        </div>
+
+        <!-- Signup Form (initially hidden) -->
+        <div id="signupForm" class="hidden">
+          <h3>Sign Up</h3>
+          <div class="input-group">
+            <input type="text" id="newUsername" placeholder="Username" />
+            <input type="email" id="email" placeholder="Email" />
+            <input type="password" id="newPassword" placeholder="Password" />
+            <button onclick="signup()">Sign Up</button>
+          </div>
+          <p>
+            Already have an account?
+            <a href="#" onclick="toggleAuthForms()">Login</a>
+          </p>
+        </div>
+
+        <div>
+          <p id="loginStatus"></p>
+        </div>
+      </div>
+
+      <!-- Chat Section (initially hidden) -->
+      <div id="chatSection" class="section hidden">
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          "
+        >
+          <h2>Chat</h2>
+          <button
+            onclick="logout()"
+            style="background-color: #f44336; color: white"
+          >
+            Logout
+          </button>
+        </div>
+
+        <div class="input-group">
+          <input type="text" id="roomName" placeholder="Room Name" />
+          <button onclick="joinRoom()">Join Room</button>
+        </div>
+
+        <div class="input-group">
+          <input type="text" id="messageInput" placeholder="Your message" />
+          <button onclick="sendMessage()">Send</button>
+          <button onclick="sendTyping(true)">Start Typing</button>
+          <button onclick="sendTyping(false)">Stop Typing</button>
+        </div>
+
+        <div
+          class="section"
+          style="margin-top: 15px; background-color: #f9f9f9"
+        >
+          <h3>Current Room: <span id="currentRoomDisplay">None</span></h3>
+        </div>
+      </div>
+
+      <!-- Log Section -->
+      <div class="section">
+        <h2>Event Log</h2>
+        <button onclick="clearLog()">Clear Log</button>
+        <pre id="log"></pre>
+      </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="index.js"></script>
+  </body>
+</html>

@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common';
+/* eslint-disable prettier/prettier */
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateCvDto } from './dto/create-cv.dto';
@@ -18,7 +19,7 @@ export class CvService {
     return this.cvRepository.save(cv);
   }
 
-  async findAll(filterCvDto: FilterCvDto) {
+  async findAll(filterCvDto: FilterCvDto, ownerUsername?: string) {
     const { criteria, age } = filterCvDto;
 
     const query = this.cvRepository.createQueryBuilder('cv');
@@ -34,6 +35,12 @@ export class CvService {
       query.orWhere('cv.age = :age', { age });
     }
 
+    if (ownerUsername) {
+      query
+        .innerJoinAndSelect('cv.user', 'user')
+        .where('user.username = :ownerUsername', { ownerUsername });
+    }
+
     return query.getMany();
   }
 
@@ -44,6 +51,15 @@ export class CvService {
   async update(id: number, updateCvDto: UpdateCvDto) {
     await this.cvRepository.update(id, updateCvDto);
     return this.cvRepository.findOne({ where: { id } });
+  }
+
+  async updateImage(id: number, filename: string) {
+    const cv = await this.cvRepository.findOne({ where: { id } });
+    if (!cv) {
+      throw new NotFoundException(`CV with ID ${id} not found`);
+    }
+    cv.imagePath = filename; // Assuming `imagePath` is a column in your CV entity
+    return this.cvRepository.save(cv);
   }
 
   async remove(id: number) {

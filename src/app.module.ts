@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 
+
 import { CvModule } from './cv/cv.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -13,6 +14,13 @@ import { CvEventsModule } from './cv-events/cv-events.module';
 import { SseModule } from './sse/sse.module';
 import { MessagingModule } from './messaging/messaging.module';
 
+import { DataSourceOptions } from 'typeorm';
+import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
+import { APP_GUARD } from '@nestjs/core';
+import { join } from 'path';
+import { ChatGateway } from './websocket/chat.gateway';
+import { ChatService } from './websocket/chat.service';
+import { ChatModule } from './websocket/chat.module';
 
 @Module({
   imports: [
@@ -22,12 +30,12 @@ import { MessagingModule } from './messaging/messaging.module';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get('DB_HOST'),
+        type: configService.get<'mysql' | 'postgres'>('DB_TYPE') ?? 'mysql',
+        host: configService.get<string>('DB_HOST'),
         port: configService.get<number>('DB_PORT'),
-        username: configService.get('DB_USER'),
-        password: configService.get('DB_PASS'),
-        database: configService.get('DB_NAME'),
+        username: configService.get<string>('DB_USER'),
+        password: configService.get<string>('DB_PASS'),
+        database: configService.get<string>('DB_NAME'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
         synchronize: false,
         logging: true, // Enable logging to see SQL queries
@@ -38,11 +46,20 @@ import { MessagingModule } from './messaging/messaging.module';
     UserModule,
     SkillModule,
     AuthModule,
+
     CvEventsModule,
     SseModule,
     MessagingModule,
+    ChatModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: JwtAuthGuard,
+    // },
+  ],
 })
 export class AppModule {}

@@ -1,4 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards } from '@nestjs/common';
+
 import { CvService } from './cv.service';
 import { CreateCvDto } from './dto/create-cv.dto';
 import { UpdateCvDto } from './dto/update-cv.dto';
@@ -8,6 +9,11 @@ import { User } from '../auth/decorators/user.decorator';
 import { CvEventsService } from '../cv-events/cv-events.service';
 import { CvOperationType } from '../cv-events/entities/cv-event.entity';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth } from '@nestjs/swagger';
+import { GetUser } from 'src/auth/decorators/get-user.decorator';
+import { Role } from 'src/common/enums/roles.enum';
+import { paginate } from 'src/common/pagination.utils';
+
 
 @ApiTags('cv')
 @Controller('cv')
@@ -32,8 +38,13 @@ export class CvController {
   }
 
   @Get()
-  async findAll(@Query() filterCvDto: FilterCvDto) {
-    return this.cvService.findAll(filterCvDto);
+
+  findAll(@GetUser() user, @Query() filterCvDto: FilterCvDto) {
+    if (user.role === Role.ADMIN) {
+      return this.cvService.findAll(filterCvDto);
+    }
+
+    return this.cvService.findAll(filterCvDto, user.username);
   }
 
   @Get(':id')
@@ -49,6 +60,7 @@ export class CvController {
     }
     return cv;
   }
+  
 
   @Patch(':id')
   async update(@Param('id') id: string, @Body() updateCvDto: UpdateCvDto, @User() user) {
